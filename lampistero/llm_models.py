@@ -42,12 +42,31 @@ lampistero_llm_gemini = ModelData(
     ),
 )
 
-lampistero_llm_gpt_4o = ModelData(
-    id="lampistero-gpt-4o",
+lampistero_llm_gpt_4_1_mini = ModelData(
+    id="lampistero-gpt-4.1-mini",
     created=int(datetime.datetime(year=2025, month=4, day=7).timestamp()),
     owned_by="csm",
     parameters=Parameters(
-        llm_answer_model=LLMModels.GPT_4O,
+        llm_answer_model=LLMModels.GPT_4_1_MINI,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 12}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
+lampistero_llm_gpt_4_1 = ModelData(
+    id="lampistero-gpt-4.1",
+    created=int(datetime.datetime(year=2025, month=4, day=7).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.GPT_4_1,
         enable_reranking=False,
         enable_augmentation=True,
         retriever_params=RetrieverParams(
@@ -70,7 +89,8 @@ lampistero_tasks = ModelData(
 
 models_lookup = {
     "lampistero-gemini": lampistero_llm_gemini,
-    "lampistero-gpt-4o": lampistero_llm_gpt_4o,
+    "lampistero-gpt-4.1-mini": lampistero_llm_gpt_4_1_mini,
+    "lampistero-gpt-4.1": lampistero_llm_gpt_4_1,
     "lampistero-tasks-001": lampistero_tasks,
 }
 
