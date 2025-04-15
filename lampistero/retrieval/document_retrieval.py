@@ -66,8 +66,18 @@ def retrieve_documents(
 
     augmented_docs = []
     for doc in reranked_documents:
+        if (
+            "disable_augmentation" in doc.metadata
+            and doc.metadata["disable_augmentation"]
+        ):
+            augmented_docs.append(doc)
+            continue
+
         # Skip documents with specific topics
-        if doc.metadata["topic"] in ["anuarios", "words"] or "question" in doc.metadata:
+        if (
+            doc.metadata["topic"] in ["anuarios", "words", "blog"]
+            or "question" in doc.metadata
+        ):
             augmented_docs.append(doc)
             continue
 
