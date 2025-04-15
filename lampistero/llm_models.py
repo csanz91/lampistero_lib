@@ -137,7 +137,7 @@ client = QdrantClient(
 )
 
 dense_vector_name: str = "dense-embed"
-collection_name = "lampistero_20250408_openai"
+collection_name = "lampistero_20250415_openai"
 collection_name_questions = "lampistero_20250407_gemini_questions"
 # collection_name = "lampistero_20250403_colbert"
 sparse_model_name = "Qdrant/bm42-all-minilm-l6-v2-attentions"
