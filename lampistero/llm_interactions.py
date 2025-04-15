@@ -278,7 +278,6 @@ def generate_answer_with_tools(state: AgentState):
     1. To answer the user question you can only use the content provided from the RAG tool. You can call it as many times as needed to get the information you need.
     2. Always answer in spanish
     3. If you don't know the answer, just say that you don't know, but think hard before that.
-    4. You can ask the user for more information if you need it.
     
     User question: {state["question"]}
     """
