@@ -1,0 +1,108 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/*
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# dotenv
+.env
+.env.*
+
+# Local config
+*.local
+
+# Mac
+.DS_Store
+
+# System
+Thumbs.db
+
+# Svelte / Node.js
+node_modules/
+/dist/
+/.svelte-kit/
+/package/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Secrets
+secrets.json
+secrets.yaml
+secrets.yml
+.secrets
+secrets
+*secret*
+*credential*
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.AppleDouble
+.LSOverride
+ehthumbs.db
+Desktop.ini
+
+*.log
+.ragatouille

@@ -1,48 +1,54 @@
-# Lampistero Graph
+# Lampistero
 
-Graph building functionality for Lampistero using LangGraph.
+Lampistero is a Python library for building graph-based retrieval-augmented generation (RAG) pipelines, leveraging modern LLMs and vector databases. It provides tools for document retrieval, reranking, and LLM-based answer generation, with flexible configuration and support for hybrid search.
+
+## Features
+- Graph-based orchestration for RAG workflows
+- Integration with LangChain, Qdrant, OpenAI, Google Gemini, DeepSeek, and more
+- Customizable retriever and reranker tools
+- Support for hybrid dense/sparse retrieval
+- Pydantic-based configuration models
+- Utilities for retry logic and database access
 
 ## Installation
 
-You can install the package using pip:
+Install via pip (requires Python 3.12+):
 
 ```bash
-pip install -e /path/to/lampistero-graph
+pip install lampistero
 ```
 
-Or with uv:
+Or for development:
 
 ```bash
-uv pip install -e /path/to/lampistero-graph
+git clone <repo-url>
+cd lampistero
+pip install -e .[dev]
 ```
 
-## Usage
+## Usage Example
 
 ```python
-from lampistero_graph import GraphBuilder, Parameters
-from lampistero_graph.models import AgentState, LLMModels
+from lampistero import create_graph, Parameters
 
-# Create a graph with your custom node functions
-graph = GraphBuilder.create_graph(
-    rag_retriever=your_retriever_function,
-    generate_query_from_history=your_query_generator,
-    rewrite=your_rewrite_function,
-    generate_answer=your_answer_generator,
-    should_continue=your_continue_checker,
-    continue_to_retrieval=your_retrieval_checker
-)
-
-# Or create a graph with tools
-parameters = Parameters(
-    model=LLMModels.GEMINI,
-    temperature=0.1,
-    max_tokens=4096
-)
-
-graph_with_tools = GraphBuilder.create_graph_with_tools(
-    generate_query_from_history=your_query_generator,
-    generate_answer_with_tools=your_answer_generator_with_tools,
-    get_retriever_tool=your_retriever_tool_getter,
-    parameters=parameters
-)
+params = Parameters()
+graph = create_graph(parameters=params)
+result = graph.invoke({"question": "What is retrieval-augmented generation?"})
+print(result)
 ```
+
+## Configuration
+
+You can customize retrieval, reranking, and LLM models via the `Parameters` class. See `lampistero.models.Parameters` for all options.
+
+## Testing
+
+Run tests with:
+
+```bash
+pytest
+```
+
+## License
+
+See the LICENSE file for details.
