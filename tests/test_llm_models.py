@@ -5,7 +5,7 @@ from lampistero.models import LLMModels
 def test_get_llm_model():
     model = get_llm_model(model=LLMModels.GEMINI)
     assert model is not None
-    assert model.temperature == 1.0
+    assert model.temperature == 1.0 # type: ignore
 
 def test_get_embedding_model():
     embedding_model = get_embedding_model()
