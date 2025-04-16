@@ -99,6 +99,25 @@ lampistero_llm_deepseek = ModelData(
     ),
 )
 
+lampistero_llm_gemini_2_5_pro = ModelData(
+    id="lampistero-gemini_2_5_pro",
+    created=int(datetime.datetime(year=2025, month=4, day=16).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.GEMINI_2_5_PRO,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 12}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
 lampistero_tasks = ModelData(
     id="lampistero-tasks-001",
     created=int(datetime.datetime(year=2025, month=3, day=19).timestamp()),
@@ -108,6 +127,7 @@ lampistero_tasks = ModelData(
 
 models_lookup = {
     "lampistero-gemini": lampistero_llm_gemini,
+    "lampistero-gemini-2.5-pro": lampistero_llm_gemini_2_5_pro,
     "lampistero-gpt-4.1-mini": lampistero_llm_gpt_4_1_mini,
     "lampistero-gpt-4.1": lampistero_llm_gpt_4_1,
     "lampistero-tasks-001": lampistero_tasks,

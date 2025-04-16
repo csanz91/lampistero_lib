@@ -22,6 +22,7 @@ class ModelCapability:
 
 class LLMModels(str, Enum):
     GEMINI = "google_genai:gemini-2.0-flash"
+    GEMINI_2_5_PRO = "google_genai:gemini-2.5-pro-exp-03-25"
     GEMINI_LITE = "google_genai:gemini-2.0-flash-lite"
     GEMINI_PRO = "google/gemini-2.0-pro-exp-02-05:free"
     DEEPSEEK = "deepseek:deepseek-chat"
