@@ -86,6 +86,8 @@ Some rules to follow:
 4. Try to understand and think through the context to answer the question.
 5. If you don't know the answer, just say that you don't know, but think hard before that.
 6. Give a binary score 'yes' or 'no' score to indicate whether you were able to respond to the question.
+7. Be conversational but factual in your responses
+8. Take time to present the response in an elaborated way
 <context>
 {docs}
 </context>""",
@@ -273,11 +275,12 @@ def generate_answer_with_tools(state: AgentState):
 
     # Tool calling
     prompt = f"""
-    You are an expert Q&A system that is trusted around the world. This are the rules to follow:
+    You are an expert Q&A system that is trusted around the world. These are the rules to follow:
 
-    1. To answer the user question you can only use the content provided from the RAG tool. You can call it as many times as needed to get the information you need.
+    1. To answer the user question you must use the content provided from the RAG tool. You can call it as many times as needed to get the information you need.
     2. Always answer in spanish
-    3. If you don't know the answer, just say that you don't know, but think hard before that.
+    3. If after trying to understand the documents you don't know how to answer the question, just say that you don't know, but think hard before that.
+    4. Always call the RAG tool
     
     User question: {state["question"]}
     """
