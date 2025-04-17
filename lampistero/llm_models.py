@@ -118,6 +118,44 @@ lampistero_llm_gemini_2_5_pro = ModelData(
     ),
 )
 
+lampistero_llm_o4_mini = ModelData(
+    id="lampistero-o4-mini",
+    created=int(datetime.datetime(year=2025, month=4, day=17).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.O4_MINI,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 12}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
+lampistero_llm_o3 = ModelData(
+    id="lampistero-o3",
+    created=int(datetime.datetime(year=2025, month=4, day=17).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.O3,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 12}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
 lampistero_tasks = ModelData(
     id="lampistero-tasks-001",
     created=int(datetime.datetime(year=2025, month=3, day=19).timestamp()),
@@ -132,6 +170,8 @@ models_lookup = {
     "lampistero-gpt-4.1": lampistero_llm_gpt_4_1,
     "lampistero-tasks-001": lampistero_tasks,
     "lampistero_llm_deepseek": lampistero_llm_deepseek,
+    "lampistero-o4-mini": lampistero_llm_o4_mini,
+    "lampistero-o3": lampistero_llm_o3,
 }
 
 

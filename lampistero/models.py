@@ -30,6 +30,8 @@ class LLMModels(str, Enum):
     GPT_4_1_MINI = "openai:gpt-4.1-mini"
     GPT_4_1= "openai:gpt-4.1"
     GPT_4O = "openai:gpt-4o"
+    O4_MINI = "openai:o4-mini"
+    O3 = "openai:o3"
     O3_MINI = "openai:o3-mini"
     QWEN = "qwen/qwq-32b:free"
 
