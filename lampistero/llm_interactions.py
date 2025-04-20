@@ -30,62 +30,19 @@ def generate_query_from_history(state: AgentState):
     if not chat_history:
         return state
 
-    class ContextualizeQueryResponse(BaseModel):
-        """Query extracted from chat history."""
 
-        question: str = Field(description="Question to be asked")
-
-    contextualize_q_system_prompt = """**Rol:** Eres un asistente de IA especializado en la reescritura y expansión de consultas para sistemas avanzados de búsqueda vectorial.
-
-**Objetivo:** Reescribir la "Pregunta" proporcionada para maximizar su efectividad en la búsqueda vectorial. Esto implica:
-1.  **Contextualización:** Incorporar inteligentemente información y contexto relevantes del "Historial de Chat".
-2.  **Expansión y Enriquecimiento:** Ampliar la consulta con sinónimos relevantes, conceptos relacionados y detalles aclaratorios para capturar el significado semántico completo.
-3.  **Preservación Semántica:** Asegurar que la intención y el significado central de la consulta *original* del usuario se conserven con precisión y sean el núcleo de la consulta reescrita.
-4.  **Optimización para Búsqueda Vectorial:** Estructurar la consulta reescrita para resaltar entidades clave, conceptos y relaciones, haciéndola ideal para la coincidencia de similitud semántica.
-5.  **Idioma de Salida:** La consulta final reescrita **DEBE ESTAR EN ESPAÑOL**.
-
-**Entradas:**
-1.  `Pregunta`: La última pregunta o declaración del usuario.
-2.  `Historial de Chat`: Una lista cronológica de preguntas anteriores del usuario y respuestas del asistente (si las hay). Puede estar vacío (puede contener texto en cualquier idioma).
-
-**Instrucciones:**
-
-1.  **Analizar Consulta Actual:** Identifica el tema central, las entidades, la acción y la intención de la `Pregunta`.
-2.  **Analizar Historial de Chat (Si está disponible):**
-    *   Examina el `Historial de Chat` en busca de contexto directamente relevante para la `Pregunta`. Busca:
-        *   **Resolución de Pronombres/Ambigüedad:** Identifica a qué se refieren los pronombres (él, ella, eso, ellos, etc.) o términos ambiguos en la consulta actual basándote en el historial.
-        *   **Temas/Entidades Establecidos:** Reconoce temas, nombres o conceptos recurrentes discutidos anteriormente que proporcionan contexto.
-        *   **Suposiciones Implícitas:** Comprende cualquier suposición subyacente o contexto construido durante la conversación.
-        *   **Cambio de Enfoque:** Observa si la consulta actual se desvía significativamente del tema del historial reciente.
-    *   **Priorizar Historial Reciente:** Da más peso a los turnos recientes de la conversación, pero considera el contexto fundamental establecido anteriormente si es relevante.
-    *   **Descartar Historial Irrelevante:** *No* incluyas información del historial que no esté relacionada con la intención específica de la consulta *actual*.
-3.  **Sintetizar y Reescribir (Paso Intermedio):**
-    *   Combina la intención central de la `Pregunta` con el contexto *relevante* identificado del `Historial de Chat`.
-    *   Reemplaza pronombres o términos ambiguos con las entidades o conceptos específicos a los que se refieren (basado en el historial).
-    *   Reformula la consulta de forma natural, integrando el contexto sin problemas.
-4.  **Expandir y Enriquecer (Paso Intermedio):**
-    *   Añade sinónimos relevantes, formulaciones alternativas o conceptos relacionados que amplíen el alcance semántico sin cambiar el significado central (p. ej., si la consulta es sobre "entrenamiento de perros", añade términos como "comportamiento canino", "obediencia de cachorros").
-    *   Si la consulta es vaga, añade especificidad derivada del contexto o interpretaciones de sentido común de la intención probable (p. ej., "Tell me about it" después de hablar de un modelo de coche específico se convierte en "Háblame de las características y especificaciones del [Nombre del Modelo de Coche]").
-5.  **Formular y Refinar para Búsqueda Vectorial (Salida Final en Español):**
-    *   Asegúrate de que la consulta final sea clara, descriptiva y centrada en los elementos semánticos clave.
-    *   Evita relleno conversacional a menos que sea esencial para el significado.
-    *   **Traduce y formula la consulta final reescrita completa y coherentemente en ESPAÑOL.** La salida debe ser una única cadena de consulta en español.
-
-**Qué Evitar:**
-
-*   Simplemente concatenar la consulta actual y el historial de chat.
-*   Incluir detalles históricos irrelevantes.
-*   Cambiar el tema o la intención fundamental de la `Pregunta`.
-*   Hacer la consulta excesivamente larga con información redundante.
-*   Incluir cuestiones o informacion a la pregunta no requeridos por el usuario
-*   Producir cualquier salida que no sea la cadena de consulta reescrita **en español**.
+    contextualize_q_system_prompt = """Given a chat history and the latest user question 
+which might reference context in the chat history, 
+formulate a standalone question which can be understood 
+without the chat history. Do NOT answer the question, 
+just reformulate it if needed and otherwise return it as is.
+The question should be in Spanish.
 
 **Formato de Salida:**
-Produce *únicamente* la cadena de consulta final reescrita **en español**.
+Produce *únicamente* la cadena de consulta final.
 
 **Contexto:**
 El contexto de las preguntas estara relacionado con la historia y cultura de un pueblo minero de España llamado Escucha."""
-
 
     # LLM
     llm = get_llm_model(
