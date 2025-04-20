@@ -21,19 +21,24 @@ class ModelCapability:
 
 
 class LLMModels(str, Enum):
-    GEMINI = "google_genai:gemini-2.0-flash"
+    GEMINI = "google_genai:gemini-2.0-flash-001"
+    GEMINI_2_0_FLASH_THINKING = "google_genai:gemini-2.0-flash-thinking-exp-01-21"
     GEMINI_2_5_PRO = "google_genai:gemini-2.5-pro-exp-03-25"
-    GEMINI_LITE = "google_genai:gemini-2.0-flash-lite"
+    GEMINI_2_5_FLASH = "google_genai:gemini-2.5-flash-preview-04-17"
+    GEMINI_FLASH_2_0_LITE = "google_genai:gemini-2.0-flash-lite"
     GEMINI_PRO = "google/gemini-2.0-pro-exp-02-05:free"
     DEEPSEEK = "deepseek:deepseek-chat"
     DEEPSEEK_REASONER = "deepseek/deepseek-r1:free"
     GPT_4_1_MINI = "openai:gpt-4.1-mini"
-    GPT_4_1= "openai:gpt-4.1"
+    GPT_4_1 = "openai:gpt-4.1"
     GPT_4O = "openai:gpt-4o"
     O4_MINI = "openai:o4-mini"
     O3 = "openai:o3"
     O3_MINI = "openai:o3-mini"
-    QWEN = "qwen/qwq-32b:free"
+    AGENT = "lampistero-agent"
+    CAG = "lampistero-cag"
+    GROK_3_MINI = "x-ai/grok-3-mini-beta"
+    MAI_DS_R1 = "microsoft/MAI-DS-R1"
 
 
 class CompletionRequest(BaseModel):
@@ -196,6 +201,7 @@ class AgentState(TypedDict):
     parameters: Parameters
     num_retrievals: int
     retrieval_questions: list[str]
+
 
 class RetrievalAugmentedMode(str, Enum):
     PREV = "prev"

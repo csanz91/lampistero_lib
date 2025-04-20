@@ -3,12 +3,14 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from lampistero.models import AgentState, Parameters
 
-from lampistero.nodes import (
-    rag_retriever,
+from lampistero.retrieval import rag_retriever
+
+from lampistero.llm_interactions import (
     generate_query_from_history,
     rewrite,
     generate_answer,
     generate_answer_with_tools,
+    generate_answer_cag,
     should_continue,
     continue_to_retrieval,
 )
@@ -84,6 +86,29 @@ def create_graph_with_tools(parameters: Parameters) -> CompiledStateGraph:
         tools_condition,
     )
     workflow.add_edge("tools", "rag")
+
+    # Compile
+    logger.debug("Compiling workflow graph")
+    graph = workflow.compile()
+
+    return graph
+
+
+def create_graph_cag() -> CompiledStateGraph:
+    # Define a new graph
+    workflow = StateGraph(AgentState)
+
+    logger.debug("Creating agent workflow graph")
+
+    # Query and context topics selection
+    workflow.add_node("question_from_history", generate_query_from_history)
+    # RAG node
+    workflow.add_node("cag", generate_answer_cag)
+
+    # Set up the graph edges
+    workflow.add_edge(START, "question_from_history")
+    workflow.add_edge("question_from_history", "cag")
+    workflow.add_edge("cag", END)
 
     # Compile
     logger.debug("Compiling workflow graph")

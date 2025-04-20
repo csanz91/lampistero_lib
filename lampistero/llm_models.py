@@ -42,25 +42,6 @@ lampistero_llm_gemini = ModelData(
     ),
 )
 
-lampistero_llm_gpt_4_1_mini = ModelData(
-    id="lampistero-gpt-4.1-mini",
-    created=int(datetime.datetime(year=2025, month=4, day=7).timestamp()),
-    owned_by="csm",
-    parameters=Parameters(
-        llm_answer_model=LLMModels.GPT_4_1_MINI,
-        enable_reranking=False,
-        enable_augmentation=True,
-        retriever_params=RetrieverParams(
-            search_kwargs={"k": 12}, search_type="similarity"
-        ),
-        enable_questions_retrieval=True,
-        questions_retriever_params=RetrieverParams(
-            search_kwargs={"score_threshold": 0.8, "k": 2},
-            search_type="similarity_score_threshold",
-        ),
-    ),
-)
-
 lampistero_llm_gpt_4_1 = ModelData(
     id="lampistero-gpt-4.1",
     created=int(datetime.datetime(year=2025, month=4, day=7).timestamp()),
@@ -70,7 +51,7 @@ lampistero_llm_gpt_4_1 = ModelData(
         enable_reranking=False,
         enable_augmentation=True,
         retriever_params=RetrieverParams(
-            search_kwargs={"k": 12}, search_type="similarity"
+            search_kwargs={"k": 25}, search_type="similarity"
         ),
         enable_questions_retrieval=True,
         questions_retriever_params=RetrieverParams(
@@ -108,7 +89,7 @@ lampistero_llm_gemini_2_5_pro = ModelData(
         enable_reranking=False,
         enable_augmentation=True,
         retriever_params=RetrieverParams(
-            search_kwargs={"k": 12}, search_type="similarity"
+            search_kwargs={"k": 30}, search_type="similarity"
         ),
         enable_questions_retrieval=True,
         questions_retriever_params=RetrieverParams(
@@ -127,7 +108,7 @@ lampistero_llm_o4_mini = ModelData(
         enable_reranking=False,
         enable_augmentation=True,
         retriever_params=RetrieverParams(
-            search_kwargs={"k": 12}, search_type="similarity"
+            search_kwargs={"k": 30}, search_type="similarity"
         ),
         enable_questions_retrieval=True,
         questions_retriever_params=RetrieverParams(
@@ -156,6 +137,63 @@ lampistero_llm_o3 = ModelData(
     ),
 )
 
+lampistero_llm_agent = ModelData(
+    id="lampistero-agent",
+    created=int(datetime.datetime(year=2025, month=4, day=17).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.AGENT,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 12}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
+lampistero_llm_gemini_2_5_flash = ModelData(
+    id="lampistero-gemini-2.5-flash",
+    created=int(datetime.datetime(year=2025, month=4, day=18).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.GEMINI_2_5_FLASH,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 30}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 2},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
+lampistero_llm_grok_3_mini = ModelData(
+    id="lampistero-grok-3-mini",
+    created=int(datetime.datetime(year=2025, month=4, day=20).timestamp()),
+    owned_by="csm",
+    parameters=Parameters(
+        llm_answer_model=LLMModels.GROK_3_MINI,
+        enable_reranking=False,
+        enable_augmentation=True,
+        retriever_params=RetrieverParams(
+            search_kwargs={"k": 30}, search_type="similarity"
+        ),
+        enable_questions_retrieval=True,
+        questions_retriever_params=RetrieverParams(
+            search_kwargs={"score_threshold": 0.8, "k": 3},
+            search_type="similarity_score_threshold",
+        ),
+    ),
+)
+
 lampistero_tasks = ModelData(
     id="lampistero-tasks-001",
     created=int(datetime.datetime(year=2025, month=3, day=19).timestamp()),
@@ -166,12 +204,14 @@ lampistero_tasks = ModelData(
 models_lookup = {
     "lampistero-gemini": lampistero_llm_gemini,
     "lampistero-gemini-2.5-pro": lampistero_llm_gemini_2_5_pro,
-    "lampistero-gpt-4.1-mini": lampistero_llm_gpt_4_1_mini,
+    "lampistero-gemini-2.5-flash": lampistero_llm_gemini_2_5_flash,
     "lampistero-gpt-4.1": lampistero_llm_gpt_4_1,
     "lampistero-tasks-001": lampistero_tasks,
     "lampistero_llm_deepseek": lampistero_llm_deepseek,
     "lampistero-o4-mini": lampistero_llm_o4_mini,
     "lampistero-o3": lampistero_llm_o3,
+    "lampistero-agent": lampistero_llm_agent,
+    "lampistero-grok-3-mini": lampistero_llm_grok_3_mini,
 }
 
 
@@ -180,14 +220,18 @@ def get_llm_model(
     max_tokens=None,
     model=LLMModels.GEMINI,
 ) -> BaseChatModel:
-    if model in [LLMModels.DEEPSEEK_REASONER, LLMModels.GEMINI_PRO, LLMModels.QWEN]:
+    if model in [
+        LLMModels.DEEPSEEK_REASONER,
+        LLMModels.GEMINI_PRO,
+        LLMModels.GROK_3_MINI,
+    ]:
         llm = ChatOpenAI(
             base_url="https://openrouter.ai/api/v1",
             api_key=SecretStr(get_docker_secrets("OPENROUTER_API_KEY")),
             model=model,
             temperature=temperature,
             max_completion_tokens=max_tokens,
-            max_retries=1,
+            max_retries=3,
         )
     else:
         llm = init_chat_model(
