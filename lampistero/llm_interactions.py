@@ -27,8 +27,8 @@ def generate_query_from_history(state: AgentState):
 
     # # If there are no messages history, return the state
     chat_history = state["chat_history"]
-    # if not chat_history:
-    #     return state
+    if not chat_history:
+        return state
 
     class ContextualizeQueryResponse(BaseModel):
         """Query extracted from chat history."""

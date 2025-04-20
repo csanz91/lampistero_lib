@@ -150,7 +150,7 @@ class Parameters(BaseModel):
         default=1.0, description="Temperature for LLM answers"
     )
     llm_chat_history_model: LLMModels = Field(
-        default=LLMModels.GEMINI, description="The model to use for LLM chat history"
+        default=LLMModels.GEMINI_FLASH_2_0_LITE, description="The model to use for LLM chat history"
     )
     llm_chat_history_temperature: float = Field(
         default=1.0, description="Temperature for LLM chat history"
