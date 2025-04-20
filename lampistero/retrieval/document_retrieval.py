@@ -1,10 +1,17 @@
 import logging
+import os
 
 from langchain_core.documents.base import Document
 from lampistero.models import Parameters
 from lampistero.reranker.reranker import rerank_api
 from lampistero.database import get_document_from_question, get_contiguous_documents
 
+from lampistero.llm_models import (
+    collection_name,
+    collection_name_questions,
+    vectorstore,
+    vectorstore_questions,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,12 +30,6 @@ def retrieve_documents(
     Returns:
         List of relevant Document objects
     """
-    from lampistero.llm_models import (
-        collection_name,
-        collection_name_questions,
-        vectorstore,
-        vectorstore_questions,
-    )
 
     documents_questions = []
     if parameters.enable_questions_retrieval:
@@ -113,3 +114,20 @@ def rag_retriever(state):
 
     logger.info(f"Retrieved {len(documents)} documents.")
     return {"documents": documents}
+
+
+def get_cached_context() -> str:
+    try:
+        data_path = os.environ["LAMPISTERO_DATA_PATH"]
+    except KeyError:
+        raise ValueError(
+            "Environment variable 'LAMPISTERO_DATA_PATH' is not set. "
+            "Please set it to the path where your data is located."
+        )
+
+    context_path = os.path.join(data_path, "context_caching.txt")
+
+    with open(context_path, "r") as file:
+        context = file.read()
+
+    return context
