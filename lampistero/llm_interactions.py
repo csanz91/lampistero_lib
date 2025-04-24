@@ -116,6 +116,7 @@ Some rules to follow:
 6. Give a binary score 'yes' or 'no' score to indicate whether you were able to respond to the question.
 7. Be conversational but factual in your responses
 8. Take time to present the response in an elaborated way
+9. Use bullet points if needed to present the answer
 <context>
 {docs}
 </context>""",
