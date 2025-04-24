@@ -262,6 +262,7 @@ client = QdrantClient(
 
 dense_vector_name: str = "dense-embed"
 collection_name = "lampistero_20250423_openai"
+collection_name_2 = "lampistero_20250423_gemini"
 collection_name_questions = "lampistero_20250424_gemini_questions"
 # collection_name = "lampistero_20250403_colbert"
 sparse_model_name = "Qdrant/bm42-all-minilm-l6-v2-attentions"
@@ -278,6 +279,16 @@ vectorstore = QdrantVectorStore(
     client=client,
     collection_name=collection_name,
     embedding=embeddings_model,
+    retrieval_mode=RetrievalMode.HYBRID,
+    vector_name=dense_vector_name,
+    sparse_embedding=sparse_embeddings,
+    sparse_vector_name=sparse_vector_name,
+)
+
+vectorstore_2 = QdrantVectorStore(
+    client=client,
+    collection_name=collection_name_2,
+    embedding=GoogleGenerativeAIEmbeddings(model="models/text-embedding-004"),
     retrieval_mode=RetrievalMode.HYBRID,
     vector_name=dense_vector_name,
     sparse_embedding=sparse_embeddings,

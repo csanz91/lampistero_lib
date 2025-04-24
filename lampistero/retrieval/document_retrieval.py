@@ -1,6 +1,7 @@
 import logging
 import os
 import json
+import time
 from typing import Optional
 
 from langchain_core.documents.base import Document
@@ -18,6 +19,7 @@ from lampistero.llm_models import (
     collection_name,
     collection_name_questions,
     vectorstore,
+    vectorstore_2,
     vectorstore_questions,
 )
 
@@ -109,7 +111,7 @@ def retrieve_documents(
     Returns:
         list of relevant Document objects, processed according to parameters.
     """
-    stats: dict[str, str | int | list[str]] = {
+    stats: dict[str, str | int | list[str] | float] = { # Allow float for time
         "query": query,
         "decomposed_questions": decomposed_questions or [],
     }  # Initialize stats dict
@@ -117,6 +119,7 @@ def retrieve_documents(
     initial_vector_count = 0
 
     # 1. Vector Search Retrieval (Main first, then Questions)
+    start_time = time.time() # Start timer for main retrieval
 
     # Main retrieval
     retriever = vectorstore.as_retriever(
@@ -142,13 +145,45 @@ def retrieve_documents(
             logger.error(
                 f"Error retrieving documents from main vector store: {e}, query: {q}"
             )
+    end_time = time.time() # End timer for main retrieval
     logger.info(
         f"Found {len(retrieved_docs_map)} documents after main retrieval."
     )  # Log after main
     stats["main_retrieval_count"] = len(retrieved_docs_map)  # Store stat
+    stats["main_retrieval_time_s"] = end_time - start_time # Store time
+
+    # Vectorstore 2 Retrieval
+    start_time = time.time() # Start timer for vs2 retrieval
+    count_before_vs2 = len(retrieved_docs_map)
+    retriever_vs2 = vectorstore_2.as_retriever(
+        search_type=parameters.retriever_params.search_type,  # Assuming same params for now
+        search_kwargs=parameters.retriever_params.search_kwargs,
+    )
+    for q in queries:  # Use the same queries list (original + decomposed)
+        try:
+            retrieved_docs_vs2: list[Document] = retriever_vs2.invoke(q, filter=filter)
+            logger.debug(
+                f"Retrieved {len(retrieved_docs_vs2)} documents from vectorstore_2 for query '{q}'."
+            )
+            # initial_vector_count += len(retrieved_docs_vs2) # Decide if this should count towards initial
+            for doc in retrieved_docs_vs2:
+                if doc.metadata["_id"] not in retrieved_docs_map:
+                    retrieved_docs_map[doc.metadata["_id"]] = doc
+        except Exception as e:
+            logger.error(
+                f"Error retrieving documents from vectorstore_2: {e}, query: {q}"
+            )
+    end_time = time.time() # End timer for vs2 retrieval
+    unique_from_vs2 = len(retrieved_docs_map) - count_before_vs2
+    logger.info(
+        f"Found {unique_from_vs2} new unique documents from vectorstore_2 retrieval. Total unique: {len(retrieved_docs_map)}"
+    )
+    stats["vectorstore_2_added"] = unique_from_vs2  # Store stat
+    stats["vectorstore_2_time_s"] = end_time - start_time # Store time
 
     # Questions Vector Store Retrieval
-    count_after_main = len(retrieved_docs_map)  # Store count after main
+    start_time = time.time() # Start timer for questions retrieval
+    count_after_main = len(retrieved_docs_map)  # Store count after main AND vs2
     documents_questions = []
     if parameters.enable_questions_retrieval:
         retriever_questions = vectorstore_questions.as_retriever(
@@ -174,15 +209,20 @@ def retrieve_documents(
                     retrieved_docs_map[doc.metadata["_id"]] = doc
         except Exception as e:
             logger.error(f"Error retrieving documents from questions vector store: {e}")
+    else:
+        logger.info("Skipped questions retrieval (disabled).")
 
+    end_time = time.time() # End timer for questions retrieval
     # Log unique documents added by questions retrieval
     unique_from_questions = len(retrieved_docs_map) - count_after_main
     logger.info(
         f"Found {unique_from_questions} new unique documents from questions retrieval."
     )
     stats["questions_added"] = unique_from_questions  # Store stat
+    stats["questions_retrieval_time_s"] = end_time - start_time # Store time
 
     # 2. Date-based Retrieval
+    start_time = time.time() # Start timer for date retrieval
     if dates:
         MAX_DATE_DOCS = 20
         count_before_dates = len(retrieved_docs_map)
@@ -218,8 +258,14 @@ def retrieve_documents(
             f"Found {unique_from_dates} new documents from date search. Total unique: {len(retrieved_docs_map)}"
         )
         stats["date_added"] = unique_from_dates  # Store stat
+    else:
+        logger.info("Skipped date retrieval (no dates provided).")
+        stats["date_added"] = 0 # Explicitly set to 0 if skipped
+    end_time = time.time() # End timer for date retrieval
+    stats["date_retrieval_time_s"] = end_time - start_time # Store time
 
     # 3. Entity-based Retrieval
+    start_time = time.time() # Start timer for entity retrieval
     if entities:
         MAX_ENTITY_DOCS = 20
         count_before_entities = len(retrieved_docs_map)
@@ -253,6 +299,11 @@ def retrieve_documents(
             f"Found {unique_from_entities} new documents from entity search. Total unique: {len(retrieved_docs_map)}"
         )
         stats["entity_added"] = unique_from_entities  # Store stat
+    else:
+        logger.info("Skipped entity retrieval (no entities provided).")
+        stats["entity_added"] = 0 # Explicitly set to 0 if skipped
+    end_time = time.time() # End timer for entity retrieval
+    stats["entity_retrieval_time_s"] = end_time - start_time # Store time
 
     # Initial combined list of unique documents
     combined_documents = list(retrieved_docs_map.values())
@@ -264,11 +315,15 @@ def retrieve_documents(
     stats["total_unique_before_extension"] = len(combined_documents)  # Store stat
 
     # 4. Extend with Group Documents (Applied to the combined list)
+    start_time = time.time() # Start timer for group extension
     extended_documents = _extend_documents_with_groups(combined_documents)
+    end_time = time.time() # End timer for group extension
     logger.info(f"Total documents after group extension: {len(extended_documents)}")
     stats["total_after_extension"] = len(extended_documents)  # Store stat
+    stats["group_extension_time_s"] = end_time - start_time # Store time
 
     # 5. Reranking (Applied after extension)
+    start_time = time.time() # Start timer for reranking
     if (
         parameters.enable_reranking and len(extended_documents) > 1
     ):  # Reranking needs > 1 doc
@@ -291,18 +346,23 @@ def retrieve_documents(
             logger.info("Skipped reranking (<= 1 document).")
         else:
             logger.info("Skipped reranking (disabled).")
+    end_time = time.time() # End timer for reranking
     stats["total_after_rerank"] = len(
         processed_documents
     )  # Store stat (will be same as extension if skipped)
+    stats["rerank_time_s"] = end_time - start_time # Store time
 
     # 6. Augmentation (Applied after reranking or extension)
+    start_time = time.time() # Start timer for augmentation
     if parameters.enable_augmentation:
         final_documents = _augment_documents(processed_documents)
         logger.info(f"Total documents after augmentation: {len(final_documents)}")
     else:
         final_documents = processed_documents  # Skip augmentation if disabled
         logger.info("Skipped augmentation (disabled).")
+    end_time = time.time() # End timer for augmentation
     stats["final_count"] = len(final_documents)  # Store final stat
+    stats["augmentation_time_s"] = end_time - start_time # Store time
 
     logger.info(f"Returning {len(final_documents)} final documents.")
 
