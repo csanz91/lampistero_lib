@@ -6,7 +6,7 @@ from langchain_core.messages import ToolMessage
 from typing import Literal
 from langgraph.types import Send
 
-from lampistero.models import AgentState
+from lampistero.models import AgentState, DateModel
 from lampistero.utils.retry import retry
 from lampistero.llm_models import get_llm_model, LLMModels
 from lampistero.tools import get_retriever_tool
@@ -27,29 +27,44 @@ def generate_query_from_history(state: AgentState):
 
     # # If there are no messages history, return the state
     chat_history = state["chat_history"]
-    if not chat_history:
-        return state
+    # if not chat_history:
+    #     return state
 
 
-    contextualize_q_system_prompt = """Given a chat history and the latest user question 
-which might reference context in the chat history, 
-formulate a standalone question which can be understood 
-without the chat history. Do NOT answer the question, 
-just reformulate it if needed and otherwise return it as is.
+    contextualize_q_system_prompt = """Given a chat history and the latest user question which might reference context in the chat history, 
+formulate a standalone question which can be understood without the chat history. Do NOT answer the question, just reformulate it if needed.
 The question should be in Spanish.
 
-**Formato de Salida:**
-Produce *únicamente* la cadena de consulta final.
+**Output format:**
+question: user question, fix any spelling mistakes and make it more clear. For example: 'en que ano se fundo la empresa de escucha' -> '¿En qué año se fundó la empresa ubicada en Escucha?'
+dates: list of dates related to the query. Each date can have a year, month and day components. For example: 'en el año 1978 se fundo la empresa'. Year: 1978, month: None, day: None
+entities: list of entities related to the query. Each entity can be a person, organization, location, etc. For example: 'la empresa Lampistero se fundo en Escucha'. Entities: ['Lampistero', 'Escucha']
+decomposed_questions: Break down the original query into a list of simpler sub-queries. Each sub-query should focus on a different aspect of the original question.
 
 **Contexto:**
-El contexto de las preguntas estara relacionado con la historia y cultura de un pueblo minero de España llamado Escucha."""
+El contexto de las preguntas estara relacionado con la historia y cultura de un pueblo minero de España llamado Escucha. Valdeconejos es un pueblo cercano a Escucha. El contexto puede incluir eventos históricos, personajes importantes, tradiciones, leyendas, etc. El contexto no debe ser mencionado en la respuesta."""
+
+    # Data model
+    class LLMResponse(BaseModel):
+        """Binary score for relevance check."""
+
+        question: str = Field(description="Improved question")
+        dates: list[DateModel] = Field(
+            description="List of dates related to the query", default_factory=list
+        )
+        entities: list[str] = Field(
+            description="List of entities related to the query", default_factory=list
+        )
+        decomposed_questions: list[str] = Field(
+            description="List of decomposed queries", default_factory=list
+        )
 
     # LLM
     llm = get_llm_model(
         model=state["parameters"].llm_chat_history_model,
         temperature=state["parameters"].llm_chat_history_temperature,
         max_tokens=512,
-    )
+    ).with_structured_output(LLMResponse)
 
     # langchain ChatModel will be automatically traced
     chat_history = "\n".join(msg.pretty_repr() for msg in chat_history)
@@ -61,7 +76,7 @@ Historial de Chat:
 Pregunta:
 {state["question"]}"""
 
-    ai_msg = llm.invoke(
+    ai_msg: LLMResponse = llm.invoke(
         [
             {"role": "system", "content": contextualize_q_system_prompt},
             {"role": "user", "content": user_prompt},
@@ -73,8 +88,11 @@ Pregunta:
         raise ValueError("No answer was generated.")
 
     return {
-        "question": ai_msg.content,
+        "question": ai_msg.question,
+        "retrieval_dates": ai_msg.dates,
+        "retrieval_entities": ai_msg.entities,
         "documents": state["documents"],
+        "decomposed_questions": ai_msg.decomposed_questions,
     }
 
 
@@ -336,7 +354,7 @@ Some rules to follow:
     )
 
     assert state["parameters"].llm_answer_model in [
-        LLMModels.GEMINI,
+        LLMModels.GEMINI_2_0_FLASH,
         LLMModels.GEMINI_2_5_PRO,
         LLMModels.GEMINI_2_0_FLASH_THINKING,
     ], "Only GEMINI and GEMINI_2_5_PRO models are supported for CAG"

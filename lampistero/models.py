@@ -21,7 +21,7 @@ class ModelCapability:
 
 
 class LLMModels(str, Enum):
-    GEMINI = "google_genai:gemini-2.0-flash-001"
+    GEMINI_2_0_FLASH = "google_genai:gemini-2.0-flash-001"
     GEMINI_2_0_FLASH_THINKING = "google_genai:gemini-2.0-flash-thinking-exp-01-21"
     GEMINI_2_5_PRO = "google_genai:gemini-2.5-pro-exp-03-25"
     GEMINI_2_5_FLASH = "google_genai:gemini-2.5-flash-preview-04-17"
@@ -144,19 +144,20 @@ class Parameters(BaseModel):
     )
     rerank_top_k: int = Field(default=5, description="Number of documents to rerank")
     llm_answer_model: LLMModels = Field(
-        default=LLMModels.GEMINI, description="The model to use for LLM answers"
+        default=LLMModels.GEMINI_2_0_FLASH, description="The model to use for LLM answers"
     )
     llm_answer_temperature: float = Field(
         default=1.0, description="Temperature for LLM answers"
     )
     llm_chat_history_model: LLMModels = Field(
-        default=LLMModels.GEMINI_FLASH_2_0_LITE, description="The model to use for LLM chat history"
+        default=LLMModels.GEMINI_FLASH_2_0_LITE,
+        description="The model to use for LLM chat history",
     )
     llm_chat_history_temperature: float = Field(
-        default=1.0, description="Temperature for LLM chat history"
+        default=0.1, description="Temperature for LLM chat history"
     )
     llm_rewrite_model: LLMModels = Field(
-        default=LLMModels.GEMINI, description="The model to use for LLM rewrites"
+        default=LLMModels.GEMINI_2_0_FLASH, description="The model to use for LLM rewrites"
     )
     llm_rewrite_temperature: float = Field(
         default=1.0, description="Temperature for LLM rewrites"
@@ -191,6 +192,12 @@ class ModelList(BaseModel):
     data: list[ModelData]
 
 
+class DateModel(BaseModel):
+    year: Optional[int]
+    month: Optional[int]
+    day: Optional[int]
+
+
 class AgentState(TypedDict):
     messages: Annotated[list[ToolMessage], add]
     chat_history: list[BaseMessage]
@@ -201,6 +208,9 @@ class AgentState(TypedDict):
     parameters: Parameters
     num_retrievals: int
     retrieval_questions: list[str]
+    retrieval_dates: list[DateModel]
+    retrieval_entities: list[str]
+    decomposed_questions: list[str]
 
 
 class RetrievalAugmentedMode(str, Enum):

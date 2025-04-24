@@ -218,7 +218,7 @@ models_lookup = {
 def get_llm_model(
     temperature=1.0,
     max_tokens=None,
-    model=LLMModels.GEMINI,
+    model=LLMModels.GEMINI_2_0_FLASH,
 ) -> BaseChatModel:
     if model in [
         LLMModels.DEEPSEEK_REASONER,
@@ -261,8 +261,8 @@ client = QdrantClient(
 )
 
 dense_vector_name: str = "dense-embed"
-collection_name = "lampistero_20250415_openai"
-collection_name_questions = "lampistero_20250407_gemini_questions"
+collection_name = "lampistero_20250423_openai"
+collection_name_questions = "lampistero_20250424_gemini_questions"
 # collection_name = "lampistero_20250403_colbert"
 sparse_model_name = "Qdrant/bm42-all-minilm-l6-v2-attentions"
 vector_size: int = 768
