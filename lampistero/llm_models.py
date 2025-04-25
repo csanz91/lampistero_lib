@@ -153,6 +153,7 @@ lampistero_llm_agent = ModelData(
             search_kwargs={"score_threshold": 0.8, "k": 2},
             search_type="similarity_score_threshold",
         ),
+        agent_mode=True,
     ),
 )
 

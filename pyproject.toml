@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lampistero"
-version = "0.1.27"
+version = "0.1.28"
 description = "Graph building functionality for Lampistero"
 readme = "README.md"
 requires-python = ">=3.12"
