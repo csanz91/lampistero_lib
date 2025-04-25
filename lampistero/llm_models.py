@@ -142,7 +142,7 @@ lampistero_llm_agent = ModelData(
     created=int(datetime.datetime(year=2025, month=4, day=17).timestamp()),
     owned_by="csm",
     parameters=Parameters(
-        llm_answer_model=LLMModels.GEMINI_2_0_FLASH,
+        llm_answer_model=LLMModels.O4_MINI,
         enable_reranking=False,
         enable_augmentation=True,
         retriever_params=RetrieverParams(
