@@ -9,7 +9,13 @@ from langgraph.types import Send
 from lampistero.models import AgentState, DateModel
 from lampistero.utils.retry import retry
 from lampistero.llm_models import get_llm_model, LLMModels
-from lampistero.tools import get_retriever_tool
+from lampistero.tools import (
+    get_retriever_tool,
+    get_question_retriever_tool,
+    search_by_date,
+    search_by_entity,
+)
+
 from lampistero.retrieval.document_retrieval import get_cached_context
 
 
@@ -29,7 +35,6 @@ def generate_query_from_history(state: AgentState):
     chat_history = state["chat_history"]
     # if not chat_history:
     #     return state
-
 
     contextualize_q_system_prompt = """Given a chat history and the latest user question which might reference context in the chat history, 
 formulate a standalone question which can be understood without the chat history. Do NOT answer the question, just reformulate it if needed.
@@ -299,14 +304,19 @@ def generate_answer_with_tools(state: AgentState):
         model=state["parameters"].llm_answer_model,
     )
     model_with_tools = llm.bind_tools(
-        [get_retriever_tool(state["parameters"])],
+        [
+            get_retriever_tool(state["parameters"]),
+            get_question_retriever_tool(state["parameters"]),
+            search_by_date,
+            search_by_entity,
+        ],
     )
 
     # Tool calling
     prompt = f"""
     You are an expert Q&A system that is trusted around the world. These are the rules to follow:
 
-    1. To answer the user question you must use the content provided from the RAG tool. You can call it as many times as needed to get the information you need.
+    1. To answer the user question you must use the content provided from the tools. You can call it as many times as needed to get the information you need.
     2. Always answer in spanish
     3. If after trying to understand the documents you don't know how to answer the question, just say that you don't know, but think hard before that.
     

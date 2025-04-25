@@ -16,7 +16,12 @@ from lampistero.llm_interactions import (
 )
 import logging
 
-from lampistero.tools import get_retriever_tool
+from lampistero.tools import (
+    get_retriever_tool,
+    get_question_retriever_tool,
+    search_by_date,
+    search_by_entity,
+)
 
 # Set up logger
 logger = logging.getLogger(__name__)
@@ -75,7 +80,14 @@ def create_graph_with_tools(parameters: Parameters) -> CompiledStateGraph:
     workflow.add_node("rag", generate_answer_with_tools)
 
     # Context retrievers
-    tool_node = ToolNode(tools=[get_retriever_tool(parameters)])
+    tool_node = ToolNode(
+        tools=[
+            get_retriever_tool(parameters),
+            get_question_retriever_tool(parameters),
+            search_by_date,
+            search_by_entity,
+        ]
+    )
     workflow.add_node("tools", tool_node)
 
     # Set up the graph edges

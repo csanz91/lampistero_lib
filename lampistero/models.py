@@ -173,6 +173,7 @@ class Parameters(BaseModel):
         default_factory=RetrieverParams, description="Parameters for the retriever"
     )
     max_retrievals: int = Field(default=2, description="Maximum number of retrievals")
+    agent_mode: bool = Field(default=False, description="Whether the agent mode is enabled")
 
     def log_parameters(self):
         """Log the current parameters."""
