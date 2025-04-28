@@ -222,13 +222,13 @@ def get_documents_by_date(
     where_clauses = []
     params = []
 
-    if year is not None:
+    if year:
         where_clauses.append("year = ?")
         params.append(year)
-    if month is not None:
+    if month:
         where_clauses.append("month = ?")
         params.append(month)
-    if day is not None:
+    if day:
         where_clauses.append("day = ?")
         params.append(day)
 
