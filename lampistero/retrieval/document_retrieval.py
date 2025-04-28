@@ -4,6 +4,8 @@ import json
 import time
 from typing import Optional
 
+from qdrant_client.http.models import SearchParams
+
 from langchain_core.documents.base import Document
 from lampistero.models import Parameters, DateModel
 from lampistero.reranker.reranker import rerank_api
@@ -133,7 +135,11 @@ def retrieve_documents(
 
     for q in queries:
         try:
-            retrieved_docs: list[Document] = retriever.invoke(q, filter=filter)
+            retrieved_docs: list[Document] = retriever.invoke(
+                q,
+                filter=filter,
+                search_params=SearchParams(exact=True),
+            )
             logger.debug(
                 f"Retrieved {len(retrieved_docs)} documents from main vector store for query '{q}'."
             )
@@ -161,7 +167,11 @@ def retrieve_documents(
     )
     for q in queries:  # Use the same queries list (original + decomposed)
         try:
-            retrieved_docs_vs2: list[Document] = retriever_vs2.invoke(q, filter=filter)
+            retrieved_docs_vs2: list[Document] = retriever_vs2.invoke(
+                q,
+                filter=filter,
+                search_params=SearchParams(exact=True),
+            )
             logger.debug(
                 f"Retrieved {len(retrieved_docs_vs2)} documents from vectorstore_2 for query '{q}'."
             )
@@ -192,7 +202,9 @@ def retrieve_documents(
         )
         try:
             retrieved_question_docs: list[Document] = retriever_questions.invoke(
-                query, filter=filter
+                query,
+                filter=filter,
+                search_params=SearchParams(exact=True),
             )
             documents_questions = [
                 get_document_from_question(
